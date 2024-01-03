@@ -1,8 +1,8 @@
 import {Button, Divider, Form, Input, message, Upload, UploadFile, UploadProps} from "antd";
 import {useState} from "react";
 import {RcFile, UploadChangeParam} from "antd/es/upload";
-import {LoadingOutlined, PlusOutlined} from '@ant-design/icons';
-import {ICategoryCreate} from "../types.ts";
+import {PlusOutlined} from '@ant-design/icons';
+import {ICategoryCreate} from "./types.ts";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 

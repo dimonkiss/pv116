@@ -5,6 +5,7 @@ import CategoryCreatePage from "./components/categories/create/CategoryCreatePag
 
 import { Menu } from 'antd';
 import { Link } from 'react-router-dom';
+import CategoryEditPage from "./components/categories/edit/CategoryEditPage.tsx";
 const App = () => {
     return (
         <>
@@ -24,6 +25,7 @@ const App = () => {
                 <Route path="/">
                     <Route index element={<HomePage/>} />
                     <Route path={"categories/create"} element={<CategoryCreatePage/>} />
+                    <Route path={"categories/edit"} element={<CategoryEditPage />} />
                     <Route path="*" element={<NoMatchPage />} />
                 </Route>
             </Routes>
