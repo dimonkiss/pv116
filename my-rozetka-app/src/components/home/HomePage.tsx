@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Modal } from "antd";
+import { Table, Modal, Form, Input, Upload, Button } from "antd";
 import { ColumnsType } from "antd/es/table";
-import { Button, Popconfirm } from "antd";
-import { DeleteOutlined, EditOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Popconfirm } from "antd";
+import { DeleteOutlined, EditOutlined, InfoCircleOutlined, UploadOutlined } from '@ant-design/icons';
 
 interface ICategoryItem {
     id: number;
@@ -15,6 +15,9 @@ const HomePage = () => {
     const [list, setList] = useState<ICategoryItem[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<ICategoryItem | null>(null);
     const [detailsModalVisible, setDetailsModalVisible] = useState<boolean>(false);
+    const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
+
+    const [editForm] = Form.useForm();
 
     useEffect(() => {
         axios.get<ICategoryItem[]>("http://pv116.rozetka.com/api/categories")
@@ -26,6 +29,37 @@ const HomePage = () => {
     const handleDetails = (record: ICategoryItem) => {
         setSelectedCategory(record);
         setDetailsModalVisible(true);
+    };
+
+    const handleEdit = (record: ICategoryItem) => {
+        setSelectedCategory(record);
+        editForm.setFieldsValue({
+            name: record.name,
+            // Add other fields as needed
+        });
+        setEditModalVisible(true);
+    };
+
+    const handleEditSave = async () => {
+        try {
+            const values = await editForm.validateFields();
+            const formData = new FormData();
+            formData.append("name", values.name);
+            formData.append("image", values.image?.[0]); // Assuming "image" is the name of the file input field
+
+            // Make API call to update category information using POST
+            await axios.post(`http://pv116.rozetka.com/api/categories/${selectedCategory?.id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            // Update local state with the edited category
+            setList(list.map(item => (item.id === selectedCategory?.id ? { ...item, ...values } : item)));
+            setEditModalVisible(false);
+        } catch (error) {
+            console.error('Error editing category:', error);
+        }
     };
 
     const handleDelete = async (record: ICategoryItem) => {
@@ -66,7 +100,7 @@ const HomePage = () => {
             title: 'Редагувати',
             dataIndex: 'edit',
             render: (_, record) => (
-                <Button icon={<EditOutlined />}>
+                <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
                     Редагувати
                 </Button>
             ),
@@ -110,6 +144,41 @@ const HomePage = () => {
                         <img src={`http://pv116.rozetka.com/upload/150_${selectedCategory.image}`} width={100} alt="Фото" />
                     </>
                 )}
+            </Modal>
+
+            <Modal
+                title="Редагування категорії"
+                visible={editModalVisible}
+                onCancel={() => setEditModalVisible(false)}
+                onOk={handleEditSave}
+            >
+                <Form form={editForm} layout="vertical" initialValues={{}}>
+                    <Form.Item
+                        name="name"
+                        label="Назва"
+                        rules={[{ required: true, message: 'Введіть назву категорії' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        name="image"
+                        label="Фото"
+                        valuePropName="fileList"
+                        getValueFromEvent={(e) => e && e.fileList}
+                        extra="Змініть фото категорії"
+                    >
+                        <Upload
+                            name="image"
+                            action="http://pv116.rozetka.com/api/upload" // Replace with your image upload API endpoint
+                            listType="picture"
+                            beforeUpload={() => false} // Prevent default upload behavior
+                            fileList={selectedCategory?.image ? [{ uid: '-1', name: 'Current Image', status: 'done', url: `http://pv116.rozetka.com/upload/150_${selectedCategory.image}` }] : []}
+                        >
+                            <Button icon={<UploadOutlined />}>Вибрати файл</Button>
+                        </Upload>
+                    </Form.Item>
+                    {/* Add other form fields as needed */}
+                </Form>
             </Modal>
         </>
     );
