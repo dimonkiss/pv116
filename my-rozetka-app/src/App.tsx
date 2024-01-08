@@ -9,6 +9,7 @@ import CategoryCreatePage from "./components/categories/create/CategoryCreatePag
 import { Menu } from 'antd';
 import { Link } from 'react-router-dom';
 import CategoryEditPage from "./components/categories/edit/CategoryEditPage.tsx";
+import RegisterPage from "./components/auth/register/RegisterPage.tsx";
 const App = () => {
     return (
         <>
@@ -23,6 +24,9 @@ const App = () => {
                 <Menu.Item key="404">
                     <Link to="/404">404</Link>
                 </Menu.Item>
+                <Menu.Item key="register" >
+                    <Link to="/register">Register</Link>
+                </Menu.Item>
             </Menu>
             <Routes>
                 <Route path="/">
@@ -30,6 +34,7 @@ const App = () => {
                     <Route path="categories/create" element={<CategoryCreatePage />} />
                     <Route path="*" element={<NoMatchPage />} />
                     <Route path="categories/edit/:id" element={<CategoryEditPage />} />
+                    <Route path="register" element={<RegisterPage />} />
                 </Route>
             </Routes>
         </>
