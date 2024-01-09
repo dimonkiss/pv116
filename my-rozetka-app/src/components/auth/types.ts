@@ -17,3 +17,18 @@ export interface IRegister {
     password_confirmation: string,
     image: string | undefined
 }
+export interface ILoginForm {
+
+    name: string,
+
+    password: string,
+
+}
+
+export interface ILogin {
+
+    name: string,
+
+    password: string,
+
+}

@@ -2,10 +2,32 @@
 
 import { Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import {ILogin, ILoginForm} from "../types.ts";
+import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const LoginPage = () => {
-    const onFinish = values => {
-        console.log('Received values of form: ', values);
+    const navigate = useNavigate();
+    const onFinish = async (values: ILoginForm) => {
+        const model: ILogin = {
+            ...values
+        };
+        console.log("Login model", model);
+
+        try {
+            const response = await axios.post("http://pv116.rozetka.com/api/login", model);
+
+            // Assuming your server responds with a 'token' property
+            const token = response.data.token;
+
+            // Store the token in local storage
+            localStorage.setItem('token', token);
+
+            console.log("Token:", token);
+            navigate("/"); // Redirect to the desired page
+        } catch (ex) {
+            console.error('Помилка при вході!');
+        }
     };
 
     return (
@@ -18,11 +40,11 @@ const LoginPage = () => {
             onFinish={onFinish}
         >
             <Form.Item
-                name="username"
+                name="email"
                 rules={[
                     {
                         required: true,
-                        message: 'Please input your Username!',
+                        message: 'Please input your email!',
                     },
                 ]}
             >
