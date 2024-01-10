@@ -7,34 +7,19 @@ import CategoryCreatePage from "./components/categories/create/CategoryCreatePag
 
 
 
-import { Menu } from 'antd';
-import { Link } from 'react-router-dom';
+
 import CategoryEditPage from "./components/categories/edit/CategoryEditPage.tsx";
 import RegisterPage from "./components/auth/register/RegisterPage.tsx";
 import LoginPage from "./components/auth/login/LoginPage.tsx";
+import DefaultHeader from "./containers/default/DefaultHeader.tsx";
+
 
 
 const App = () => {
     return (
         <>
 
-            <Menu mode="horizontal" theme="dark">
-                <Menu.Item key="home">
-                    <Link to="/">Home</Link>
-                </Menu.Item>
-                <Menu.Item key="create">
-                    <Link to="/categories/create">Create</Link>
-                </Menu.Item>
-                <Menu.Item key="404">
-                    <Link to="/404">404</Link>
-                </Menu.Item>
-                <Menu.Item key="register" >
-                    <Link to="/register">Register</Link>
-                </Menu.Item>
-                <Menu.Item>
-                    <Link to="/login">Login</Link>
-                </Menu.Item>
-            </Menu>
+            <DefaultHeader />
             <Routes>
                 <Route path="/">
                     <Route index element={<HomePage />} />
