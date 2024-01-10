@@ -1,12 +1,19 @@
 import { Layout, Menu } from 'antd';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { IAuthReducerState } from '../../components/auth/login/AuthReducer.ts';
+import {useDispatch, useSelector} from 'react-redux';
+import {AuthReducerActionType, IAuthReducerState} from '../../components/auth/login/AuthReducer.ts';
 
 const { Header } = Layout;
 
 const DefaultHeader = () => {
+    const dispatch = useDispatch();
     const { isAuth, user } = useSelector((redux: any) => redux.auth as IAuthReducerState);
+
+    const handleLogout = () => {
+        // Dispatch the logout action
+        dispatch({ type: AuthReducerActionType.LOGOUT_USER });
+        console.log('Logging out user');
+    };
 
     const menuItems = [
         { key: 'home', label: 'Home', link: '/' },
@@ -36,7 +43,12 @@ const DefaultHeader = () => {
                 mode="horizontal"
                 defaultSelectedKeys={['home']}
                 style={{ flex: 1, minWidth: 0 }}
-                onClick={({ key }) => handleItemClick(key as string)}
+                onClick={({ key }) => {
+                    handleItemClick(key as string);
+                    if (key === 'login' && isAuth) {
+                        handleLogout();
+                    }
+                }}
             >
                 {menuItems.map((item) => (
                     <Menu.Item key={item.key}>
