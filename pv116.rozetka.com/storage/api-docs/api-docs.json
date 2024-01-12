@@ -153,14 +153,15 @@
                 "operationId": "af9ea3f02fbf732a37e94ab4cf3f94c7",
                 "requestBody": {
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name",
                                     "description",
                                     "price",
                                     "quantity",
-                                    "category_id"
+                                    "category_id",
+                                    "images"
                                 ],
                                 "properties": {
                                     "name": {
@@ -177,6 +178,12 @@
                                     },
                                     "category_id": {
                                         "type": "integer"
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "file"
+                                        }
                                     }
                                 },
                                 "type": "object"
