@@ -18,10 +18,9 @@ const DefaultHeader = () => {
     };
 
     const menuItems = [
-        { key: 'home', label: 'Home', link: '/' },
-        { key: 'create', label: 'Create', link: '/categories/create' },
-        { key: '404', label: '404', link: '/404' },
-        { key: 'register', label: 'Register', link: '/register' },
+        { key: 'home', label: 'Головна', link: '/' },
+        { key: 'create', label: 'Створити', link: '/categories/create' },
+        { key: 'register', label: 'Реєстрація', link: '/register' },
         {
             key: 'login',
             label: isAuth ? `Вихід (${user?.email})` : 'Вхід',
