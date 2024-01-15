@@ -145,44 +145,47 @@
                         "description": "List Products."
                     }
                 }
-            },
+            }
+        },
+        "/api/product": {
             "post": {
                 "tags": [
                     "Product"
                 ],
-                "operationId": "af9ea3f02fbf732a37e94ab4cf3f94c7",
+                "operationId": "f6c6fa48346dd08aae3060e1e8765913",
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
+                                    "category_id",
                                     "name",
-                                    "description",
                                     "price",
                                     "quantity",
-                                    "category_id",
-                                    "images"
+                                    "description",
+                                    "images[]"
                                 ],
                                 "properties": {
-                                    "name": {
-                                        "type": "string"
+                                    "category_id": {
+                                        "type": "integer"
                                     },
-                                    "description": {
+                                    "name": {
                                         "type": "string"
                                     },
                                     "price": {
                                         "type": "number"
                                     },
                                     "quantity": {
-                                        "type": "integer"
+                                        "type": "number"
                                     },
-                                    "category_id": {
-                                        "type": "integer"
+                                    "description": {
+                                        "type": "string"
                                     },
-                                    "images": {
+                                    "images[]": {
                                         "type": "array",
                                         "items": {
-                                            "type": "file"
+                                            "type": "string",
+                                            "format": "binary"
                                         }
                                     }
                                 },
@@ -192,8 +195,8 @@
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Product created."
+                    "200": {
+                        "description": "Add Product."
                     }
                 }
             }

@@ -29,4 +29,4 @@ Route::post("/categories/edit/{id}", [CategoryController::class, "edit"]);
 Route::post('/login',[AuthController::class, 'login']);
 Route::post('/register',[AuthController::class, 'register']);
 Route::get('/products',[ProductController::class, 'getList']);
-Route::post('/products',[ProductController::class, 'create']);
+Route::post('/product',[ProductController::class, 'store']);

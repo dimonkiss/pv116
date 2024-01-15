@@ -7,6 +7,8 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class ProductController extends Controller
 {
@@ -27,18 +29,18 @@ class ProductController extends Controller
     /**
      * @OA\Post(
      *     tags={"Product"},
-     *     path="/api/products",
+     *     path="/api/product",
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 required={"name", "description", "price", "quantity", "category_id", "images"},
+     *                 required={"category_id","name","price","quantity","description","images[]"},
      *                 @OA\Property(
-     *                     property="name",
-     *                     type="string"
+     *                     property="category_id",
+     *                     type="integer"
      *                 ),
      *                 @OA\Property(
-     *                     property="description",
+     *                     property="name",
      *                     type="string"
      *                 ),
      *                 @OA\Property(
@@ -46,106 +48,68 @@ class ProductController extends Controller
      *                     type="number"
      *                 ),
      *                 @OA\Property(
-     *                     property="quantity",
-     *                     type="integer"
+     *                      property="quantity",
+     *                      type="number"
+     *                  ),
+     *                 @OA\Property(
+     *                     property="description",
+     *                     type="string"
      *                 ),
      *                 @OA\Property(
-     *                     property="category_id",
-     *                     type="integer"
-     *                 ),
-     *                 @OA\Property(
-     *                     property="images",
+     *                     property="images[]",
      *                     type="array",
-     *                     @OA\Items(
-     *                         type="file"
-     *                     )
+     *                     @OA\Items(type="string", format="binary")
      *                 )
      *             )
      *         )
      *     ),
-     *     @OA\Response(response="201", description="Product created.")
+     *     @OA\Response(response="200", description="Add Product.")
      * )
      */
-    public function create(Request $request)
+    public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'price' => 'required|numeric',
-            'quantity' => 'required|integer',
-            'category_id' => 'required|integer',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        $input = $request->all();
+
+        $validator = Validator::make($input, [
+            'category_id' => 'required|exists:categories,id',
+            'name' => 'required',
+            'price' => 'required',
+            'description' => 'required',
+            'quantity'=>'required',
+            'images' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
+            return response()->json($validator->errors(), 400);
         }
+        $images = $request->file('images');
+        $product = Product::create($input);
+        $sizes = [50,150,300,600,1200];
+        // create image manager with desired driver
+        $manager = new ImageManager(new Driver());
+        if ($request->hasFile('images')) {
+            foreach ($images as $image) {
+                $imageName = uniqid() . '.webp';
+                foreach ($sizes as $size) {
+                    $fileSave = $size."_".$imageName;
+                    $imageRead = $manager->read($image);
+                    $imageRead->scale(width: $size);
+                    $path=public_path('upload/'.$fileSave);
+                    $imageRead->toWebp()->save($path);
+                }
 
-        $input = $request->all();
-
-        // Create the product
-        $product = Product::create([
-            'name' => $input['name'],
-            'description' => $input['description'],
-            'price' => $input['price'],
-            'quantity' => $input['quantity'],
-            'category_id' => $input['category_id'],
-        ]);
-
-        // Array to store photo details
-        $photos = [];
-
-        // Upload and process the main image
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = uniqid() . ".webp";
-
-            // Save the original image
-            $pathOriginal = public_path("upload/original_" . $imageName);
-            $image->move(public_path("upload"), $pathOriginal);
-
-            // Create image manager with desired driver
-            $manager = new ImageManager(['driver' => 'gd']);
-
-            // Process different sizes
-            $sizes = [50, 150, 300, 600, 1200];
-            foreach ($sizes as $size) {
-                // Read the original image
-                $imageSave = $manager->make(public_path("upload/original_" . $imageName));
-
-                // Resize the image proportionally
-                $imageSave->resize($size, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                });
-
-                // Save modified image in new format
-                $pathResized = public_path("upload/" . $size . "_" . $imageName);
-                $imageSave->toWebp()->save($pathResized);
-
-                // Create a record in the product_images1 table for each image variation
-                $photo = ProductImage::create([
+                ProductImage::create([
                     'product_id' => $product->id,
-                    'name' => $size . "_" . $imageName,
+                    'name' => $imageName
                 ]);
-
-                // Store photo details in the array
-                $photos[] = [
-                    'id' => $photo->id,
-                    'url' => url("/upload/" . $size . "_" . $imageName),
-                ];
             }
-
-            // Update the product with the original image name
-            $product->image = $imageName;
-            $product->save();
         }
 
-        // Add the photos array to the product response
-        $product->photos = $photos;
+        $product->load("product_images");
 
-        return response()->json($product, 201, [
+        return response()->json($product, 200, [
             'Content-Type' => 'application/json;charset=UTF-8',
-            'Charset' => 'utf-8',
+            'Charset' => 'utf-8'
         ], JSON_UNESCAPED_UNICODE);
     }
 
